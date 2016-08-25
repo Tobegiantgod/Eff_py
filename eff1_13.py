@@ -54,4 +54,4 @@ def divide_json(path):
     finally:
         handle.close()
 
-#这种写法很有用，因为这四块代码互相配合得非常到位。例如，即使在else块写入result数据时发生异常，finally块中关闭文件句柄的那行，依然能执行。
+#这种写法很有用的，因为这四块代码互相配合得非常到位。例如，即使在else块写入result数据时发生异常，finally块中关闭文件句柄的那行，依然能执行。
