@@ -63,11 +63,48 @@ def normalize_func(get_iter):
 path='my_numbers.txt'
 
 percentages=normalize_func(lambda:read_visits(path))
+
 #上面一句等价如下写法
 #def get_iter():
 #    return read_visits(path)
 #percentages=normalize_func(get_iter)
+
 print percentages
+
+#可以改成容器类
+
+class ReadVisits(object):
+    def __init__(self,data_path):
+        self.data_path=data_path
+
+    def __iter__(self):
+        with open(self.data_path) as f:
+            for line in f:
+                yield int(line)
+
+#并在normalize函数里使用内建函数iter()检测输入值是迭代器对象还是容器类对象：
+
+def normalize_defensive(numbers):
+    if iter(numbers) is iter(numbers):
+        raise TypeError('Must supply a container')
+    total=sum(numbers)
+    result=[]
+    for value in numbers:
+        percent=100.0*value/total
+        result.append(percent)
+    return result
+
+print normalize_defensive(ReadVisits(path))
+
+
+
+
+
+
+
+
+
+
 
 
 
