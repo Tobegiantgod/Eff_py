@@ -88,7 +88,7 @@ print('Tree has %d nodes' % len(tree))
 
 from collections.abc import Sequence
 
-class BetterNode(BinaryNode, Sequence):
+class BetterNode(IndexableNode, Sequence):
     
     #__getitem__,__len__方法在Binarynode中已经实现过了，Sequence帮忙实现了count和index等方法。
     
@@ -97,7 +97,7 @@ class BetterNode(BinaryNode, Sequence):
 tree = BetterNode(10, left = BetterNode(5,left = BetterNode(2),right = BetterNode(6, right = BetterNode(7))), right=BetterNode(15, left = BetterNode(11)))
 
 print('Index of 7 is ', tree.index(7))
-print('Count of 10 is ', tree.count(10))
+print('Count of 2 is ', tree.count(2))
 
 
 
