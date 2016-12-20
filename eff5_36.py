@@ -55,4 +55,65 @@ for proc in procs:
 end = time()
 print('Finished in %.3f seconds' % (end - start))
 
+#开发者也可以向子进程输送数据，然后获取子进程的输出信息。这使得我们可以利用其他程序来平行地执行任务。
+
+import os
+
+def run_openssl(data):
+    env = os.environ.copy()
+    env['password'] = b'\xe24U\n\xd0Q13S\x11'
+    proc = subprocess.Popen(['openssl', 'enc' ,'-des3', '-pass', 'env:password'], env = env,stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+    proc.stdin.write(data)
+    proc.stdin.flush() #Ensure the child gets input
+    return proc
+
+procs = []
+for _ in range(3):
+    data = os.urandom(10)
+    proc = run_openssl(data)
+    procs.append(proc)
+
+for proc in procs:
+    out, err = proc.communicate()
+    print(out[-10:])
+
+
+#此外，我们还可以像UNIX管道那样，用平行的子进程来搭建平行的链条，所谓搭建链条(chain),就是把第一个子进程的输出，与第二个子进程的输入联系起来，并以此方式继续拼接下去。下面这个函数，可以启动一个子进程，而该进程会用命令行式的md5工具来处理输入流中的数据：
+
+def run_md5(input_stdin):
+    proc = subprocess.Popen(['md5sum'], stdin = input_stdin, stdout=subprocess.PIPE)
+    return proc
+
+#现在，启动一套openssl进程，以便加密某些数据，同时启动另一套md5进程，以便根据加密后的输出内容来计算其哈希码（hash, 杂凑码）
+
+input_procs = []
+hash_procs = []
+for _ in range(3):
+    data = os.urandom(10)
+    proc = run_openssl(data)
+    input_procs.append(proc)
+    hash_proc = run_md5(proc.stdout)
+    hash_procs.append(hash_proc)
+
+for proc in input_procs:
+    proc.communicate()
+for proc in hash_procs:
+    out, err = proc.communicate()
+    print(out.strip())
+
+#如果你担心子进程一直不终止，或担心它的输入管道及输出管道由于某些原因发生了阻塞，那么可以给communicate方法传入timeout参数。该子进程若在指定时间段内没有给出响应，communicate方法则会抛出异常，我们可以在处理异常的时候，终止出现意外的子进程。
+
+proc = run_sleep(10)
+try:
+    proc.communicate(timeout = 0.1)
+except subprocess.TimeoutExpired:
+    proc.terminate()
+    proc.wait()
+
+print('Exit status', proc.poll())
+
+#可以用subprocess模块运行子进程，并管理其输入流与输出流。
+#Python解释器能够平行地运行多条子进程，这使得开发者可以充分利用CPU的处理能力。
+#可以给communicate方法传入timeout参数，以避免子进程死锁或失去响应(hanging, 挂起）。
+
 
