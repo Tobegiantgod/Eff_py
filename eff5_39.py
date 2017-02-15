@@ -178,6 +178,7 @@ class ClosableQueue(Queue):
 
 class StoppableWorker(Thread):
     def __init__(self, func, in_queue, out_queue):
+        super().__init__()
         self.func = func
         self.in_queue = in_queue
         self.out_queue = out_queue
@@ -209,37 +210,4 @@ resize_queue.join()
 upload_queue.close()
 upload_queue.join()
 print(done_queue.qsize(), 'items finished')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
